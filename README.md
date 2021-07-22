@@ -26,17 +26,22 @@
 - In-program package installation throught `PIP` and `CONDA`.
 - Miscellaneous
 
-
 ### Plotter
 
+A `matplotlib.pyplot` handle with `with` wrapping.
 
 ### Timer
 
+A `Timer`.
 
 ### Tracker
+
+A curve tracker supporting updating, finding improvements, logging and plotting.
 
 (developing... )
 
 ### ModelWrapper
+
+A general model wrapper for arbitrary network, training, evaluating and testing pipeline.
 
 (developing... )
