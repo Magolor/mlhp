@@ -1,3 +1,5 @@
-pkg/
 examples/data/
 examples/runs/
+.DS_Store
+src/.DS_Store
+src/mlhp/.DS_Store
