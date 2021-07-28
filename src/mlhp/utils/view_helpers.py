@@ -130,9 +130,16 @@ def WHITE(obj):
     return "\033[1;37m"+str(obj)+"\033[0m"
 
 
-def TQDM(obj, s=0, desc=None, **kwargs):
-    if type(obj) is int:
-        return tqdm.trange(s,obj+s,desc=desc,dynamic_ncols=True, **kwargs)
+def TQDM(obj, s=0, desc=None, use_tqdm=True, **kwargs):
+    if use_tqdm:
+        if type(obj) is int:
+            return tqdm.trange(s,obj+s,total=obj,desc=desc,dynamic_ncols=True, **kwargs)
+        else:
+            assert (s==0)
+            return tqdm.tqdm(obj,total=len(obj),desc=desc,dynamic_ncols=True, **kwargs)
     else:
-        pbar = tqdm.tqdm(obj,desc=desc,dynamic_ncols=True, **kwargs); pbar.update(s)
-        return pbar
+        if type(obj) is int:
+            return range(s,obj+s)
+        else:
+            assert (s==0)
+            return obj

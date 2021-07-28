@@ -1,0 +1,37 @@
+{
+    "__global_args__": {
+        "logger": null,
+        "use_tqdm": true,
+        "epoch_per_save": 5,
+        "post_increment_epoch_to": 1,
+        "save_path": "{:s}checkpoints/e{:06d}.pth",
+        "best_path": "{:s}checkpoints/best.pth"
+    },
+    "tasks": [
+        {
+            "task": "train",
+            "return_stats": false,
+            "return_outputs": true,
+            "pre_increment_epoch": 0,
+            "args": {}
+        },
+        {
+            "task": "valid",
+            "return_stats": true,
+            "return_outputs": false,
+            "pre_increment_epoch": 1,
+            "args": {
+                "epoch_per_valid": 1
+            }
+        },
+        {
+            "task": "testi",
+            "return_stats": true,
+            "return_outputs": true,
+            "pre_increment_epoch": 0,
+            "args": {
+                "epoch_per_valid": -1
+            }
+        }
+    ]
+}
