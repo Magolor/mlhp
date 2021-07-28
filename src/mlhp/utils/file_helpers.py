@@ -5,6 +5,10 @@ import pickle
 def PathToString(path):
     return path if isinstance(path, str) else str(path) + '/'*path.is_dir()
 
+# Short for PathToString
+def p2s(path):
+    return path if isinstance(path, str) else str(path) + '/'*path.is_dir()
+
 def AbsPath(path):
     return PathToString(Path(path).absolute())
 
@@ -93,7 +97,8 @@ def CreateFile(path):
 
 def Delete(path):
     if Exist(path):
-        shutil.rmtree(path); return True
+        path = PathToString(path)
+        shutil.rmtree(path) if ExistFolder(path) else os.remove(path); return True
     else:
         return False
 
@@ -105,7 +110,7 @@ def ClearFile(path):
 
 
 def SaveJSON(obj, path, jsonl=False, indent=None, append=None):
-    CreateFile(path)
+    CreateFile(path); path = PathToString(path)
     if jsonl:
         assert (indent is None), "'jsonl' format does not support parameter 'indent'!"
         with jsonlines.open(path, 'a' if append else 'w') as f:
@@ -118,6 +123,7 @@ def SaveJSON(obj, path, jsonl=False, indent=None, append=None):
 
 def LoadJSON(path, jsonl=False):
     assert (ExistFile(path)), "path '{0}' does not exist".format(path)
+    path = PathToString(path)
     if jsonl:
         with open(path, 'r') as f:
             return [data for data in jsonlines.Reader(f)]
@@ -131,9 +137,10 @@ def PrettifyJSON(path, indent=4):
 
 
 def SavePickle(obj, path, protocol=None):
-    CreateFile(path)
-    pickle.dump(obj, path, protocol=protocol)
+    CreateFile(path); path = PathToString(path)
+    with open(path, 'wb') as f:
+        pickle.dump(obj, f, protocol=protocol)
 
 def LoadPickle(path):
     assert (ExistFile(path)), "path '{0}' does not exist".format(path)
-    return pickle.load(open(path,'rb'))
+    return pickle.load(open(PathToString(path),'rb'))

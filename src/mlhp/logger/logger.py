@@ -1,7 +1,16 @@
-from ..import_basic import *
-from .serializable import *
+from ..utils import *
 
-class Logger(Serializable):
+class Handle(PickleSerializable):
+    module_name = "handle"
+    module_abbr = "hdl"
+
+    def __init__(self, handle=None, priority=None):
+        self.handle = handle; self.priority = priority
+
+    def __getitem__(self, i):
+        return [self.handle, self.priority][i]
+
+class Logger(PickleSerializable):
     module_name = "logger"
     module_abbr = "log"
     ALL = 0
@@ -17,12 +26,13 @@ class Logger(Serializable):
         'in':  sys.stdin,
     }
 
-    def __init__(self, handles=[]):
+    def __init__(self, handles=list()):
         self.h = {}
         for handle in handles:
             self.add_handle(handle)
 
     def add_handle(self, handle):
+        handle = tuple(handle)
         (t,h), l = handle[0].split(':'), handle[1]
         htype = ['sys','w','a']
         assert (t in htype), f"Supported Handle Types: {htype}"
@@ -79,16 +89,20 @@ class Logger(Serializable):
     def set_level(self, handle, level):
         self.h[handle]['level'] = level
     
-    def __get_state__(self):
+    def __getstate__(self):
         tmp = [None for _ in range(len(self.h))]
         for i,key in enumerate(self.h.keys()):
             tmp[i], self.h[key]['handle'] = self.h[key]['handle'], tmp[i]
-        s = super(Logger, self).__get_state__()
+        s = super(Logger, self).__getstate__()
         for i,key in enumerate(self.h.keys()):
             tmp[i], self.h[key]['handle'] = self.h[key]['handle'], tmp[i]
         return s
 
-    def __set_state__(self, data):
-        super(Logger, self).__set_state__(data)
+    def __setstate__(self, data):
+        super(Logger, self).__setstate__(data)
         for key in self.get_handles():
             self.h[key]['handle'] = open(self.h[key]['fileargs'][0],'a') if isinstance(self.h[key]['fileargs'],tuple) else self.h[key]['fileargs']
+
+NONE_LOGGER = Logger()
+CONSOLE_LOGGER = Logger(handles=[Handle("sys:out",Logger.ALL)])
+ERROR_LOGGER = Logger(handles=[Handle("sys:err",Logger.ALL)])
