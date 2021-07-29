@@ -21,7 +21,7 @@ class TimmBackbone(nn.Module, TorchSerializable):
         layer = getattr(self.net, input_layer_name); device = layer.weight.device
         if modify_input_channels and modify_input_channels!=layer.in_channels:
             layer.in_channels = modify_input_channels
-            shape = layer.weight.shape; shape[1] = modify_input_channels
+            shape = layer.weight.shape; shape = torch.Size([shape[0],modify_input_channels,shape[2],shape[3]])
             layer.weight = nn.Parameter(torch.zeros(shape)).to(device)
             nninit.xavier_uniform_(layer.weight)
         layer = getattr(self.net, input_layer_name)
