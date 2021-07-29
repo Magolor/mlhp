@@ -28,7 +28,7 @@ class TimmBackbone(nn.Module, TorchSerializable):
         self.in_channels = layer.in_channels
         
         self.net = IntermediateLayerGetter(self.net, return_layers={output_layer_name:"out"})
-        getattr(self.net,output_layer_name) = nn.Linear(getattr(self.net,output_layer_name).in_features,embedding_dim,bias=True)
+        self.net.__dict__[output_layer_name] = nn.Linear(getattr(self.net,output_layer_name).in_features,embedding_dim,bias=True)
         self.net.to(device)
 
     def forward(self, data):
