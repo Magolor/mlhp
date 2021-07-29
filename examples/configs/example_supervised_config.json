@@ -1,15 +1,16 @@
 {
     "__global_args__": {
-        "logger": null,
         "use_tqdm": true,
         "epoch_per_save": 5,
-        "post_increment_epoch_to": 1,
+        "immediate_save": "{:s}checkpoints/raw.pth",
         "save_path": "{:s}checkpoints/e{:06d}.pth",
         "best_path": "{:s}checkpoints/best.pth"
     },
     "tasks": [
         {
             "task": "train",
+            "file_log_level": "DEBUG",
+            "console_log_level": "INFO",
             "return_stats": false,
             "return_outputs": true,
             "pre_increment_epoch": 0,
@@ -17,6 +18,8 @@
         },
         {
             "task": "valid",
+            "file_log_level": "INFO",
+            "console_log_level": "INFO",
             "return_stats": true,
             "return_outputs": false,
             "pre_increment_epoch": 1,
@@ -26,6 +29,8 @@
         },
         {
             "task": "testi",
+            "file_log_level": "FATAL",
+            "console_log_level": "INFO",
             "return_stats": true,
             "return_outputs": true,
             "pre_increment_epoch": 0,

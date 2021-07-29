@@ -21,7 +21,7 @@ class ModelWrapper(nn.Module, TorchSerializable):
         ddp = False,
         device = 'cpu',
         reset = False,
-        immediate_save = False,
+        immediate_save = None,
     ):
         super(ModelWrapper, self).__init__()
         self.net = net
@@ -48,8 +48,8 @@ class ModelWrapper(nn.Module, TorchSerializable):
         self.to(device)
         if ddp:
             self.net = DDP(self.net,find_unused_parameters=True)
-        if immediate_save:
-            self.save()
+        if immediate_save is not None:
+            self.save(path=immediate_save)
 
     def to(self, device):
         self.device = device
@@ -126,39 +126,7 @@ class ModelWrapper(nn.Module, TorchSerializable):
         return self.testi_epoch(loader, return_stats=return_stats, return_outputs=return_outputs, **args)
 
     def run_epoch(self, config, final=True):
-        '''
-        An example of config:
-        {
-            "__global_args__": {
-                "logger": <logger_to_use>,
-                "use_tqdm": <whether_to_use_tqdm>,
-                "epoch_per_save": <number_of_epochs_between_save>,
-                "post_increment_epoch_to": 1,
-                "save_path": None,
-                "best_path": "best.pth",
-            },
-            "tasks": [
-                {
-                    "task": "train",
-                    "loader": <train_loader>,
-                    "return_stats": <whether_to_return_train_stats>,
-                    "return_outputs": <whether_to_return_train_outputs>,
-                    "pre_increment_epoch": 0,
-                    "args": <train_args_as_dict>,
-                },
-                {
-                    "task": "valid",
-                    "loader": <valid_loader>,
-                    "return_stats": <whether_to_return_valid_stats>,
-                    "return_outputs": <whether_to_return_valid_outputs>,
-                    "pre_increment_epoch": 1,
-                    "epoch_per_valid": <number_of_epochs_between_validation>,
-                    "args": <valid_args_as_dict>,
-                },
-                ...
-            ]
-        }
-        '''
+        # Check that all tasks are well-defined
         for cfg in config['tasks']:
             task_func = cfg['task']+"_epoch"
             assert (hasattr(self, task_func)), f"'{task_func}' is not defined!"
@@ -185,14 +153,16 @@ class ModelWrapper(nn.Module, TorchSerializable):
                 for _ in range(inc):
                     self.scheduler.step()
         
-        if epoch_inc < config['__global_args__']['post_increment_epoch_to']:
-            inc = config['__global_args__']['post_increment_epoch_to']-epoch_inc
+        post_increment_epoch_to = config['__global_args__']['post_increment_epoch_to'] if 'post_increment_epoch_to' in config['__global_args__'] else 1
+        if epoch_inc < post_increment_epoch_to:
+            inc = post_increment_epoch_to-epoch_inc
             self.epoch += inc
             if self.scheduler is not None:
                 for _ in range(inc):
                     self.scheduler.step()
 
-        if config['__global_args__']['epoch_per_save'] <= 0 or (self.epoch%config['__global_args__']['epoch_per_save']==0):
+        epoch_per_save = config['__global_args__']['epoch_per_save'] if 'epoch_per_save' in config['__global_args__'] else 1
+        if epoch_per_save <= 0 or self.epoch%epoch_per_save==0:
             self.save(config['__global_args__']['save_path'])
 
         return res
@@ -206,7 +176,7 @@ class ModelWrapper(nn.Module, TorchSerializable):
                 if t['return_stats'] and (r is not None):
                     output = "[%s]"%self.net.module_name+" Epoch %s (%s)"%("#%04d"%self.epoch,
                              ', '.join([f"{k}={'%.4f'%v}" for k,v in r['stats'].items()]))
-                    t['args']['logger'].log(output,level=Logger.INFO)
+                    t['args']['logger'].log(output,level=Logger.FATAL if (i==num_iters-1) else Logger.INFO)
                     if t['task']=='valid':
                         for k,v in r['stats'].items():
                             updated = self.tracker.update(k, self.epoch, v)

@@ -97,4 +97,73 @@ class VanillaSupervisedModelWrapper(ModelWrapper):
                     pbar.set_description(output,refresh=True)
         
         return self.batch_reduce(res)
-        
+
+def setup_vanilla_supervised_model_wrapper(
+    exp_root,
+    exp_name,
+    exp_info,
+    subclass,
+    loaders,
+    net,
+    config_path,
+    loss_criterion,
+    optimizer,
+    scheduler,
+    metrics=[
+        Metric(name='loss',key=lambda x:x),
+    ],
+    primary='loss',
+    start_epoch=0,
+    ddp=False,
+    device='cpu',
+    reset=True,
+    immediate_save=False,
+    log_dir="logs/",
+    plt_figsize=(8,6),
+    plt_dpi=300,
+    tracker_dir="stats/",
+
+):
+    config = LoadJSON(config_path)
+
+    immediate_save = config['__global_args__'].pop('immediate_save') if 'immediate_save' in config['__global_args__'] else None
+    mr = subclass(
+        net=net,
+        loss_criterion=loss_criterion,
+        exp_root=exp_root,
+        exp_name=exp_name,
+        exp_info=exp_info,
+        optimizer=optimizer,
+        scheduler=scheduler,
+        tracker=None,
+        primary=primary,
+        epoch=start_epoch,
+        ddp=ddp,
+        device=device,
+        reset=reset,
+        immediate_save=immediate_save,
+    )
+
+    plotter = Plotter(
+        figsize=plt_figsize,
+        dpi=plt_dpi,
+        mode="save",
+    )
+
+    tracker = Tracker(
+        title=' '.join([exp_name, exp_info]),
+        path=mr.path+f"{tracker_dir}tracker.data",
+        metrics=metrics,
+        plotter=plotter,
+    )
+    mr.set_tracker(tracker)
+
+    for i,loader in enumerate(loaders):
+        cfg = config['tasks'][i]
+        cfg['loader'] = loader
+        cfg['args']['logger'] = Logger([
+            Handle(handle="w:"+mr.path+f"{log_dir}{i}-{cfg['task']}.log",priority=getattr(Logger, cfg.pop('file_log_level'))),
+            Handle(handle="sys:out",priority=getattr(Logger, cfg.pop('console_log_level'))),
+        ])
+
+    return mr, config

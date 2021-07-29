@@ -20,7 +20,7 @@ class Plotter(JSONSerializable):
     
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.mode=='save':
-            plt.savefig(self.path); plt.close()
+            CreateFile(self.path); plt.savefig(self.path); plt.close()
         elif self.mode=='show':
             plt.show(); plt.close()
         elif self.mode=='none':

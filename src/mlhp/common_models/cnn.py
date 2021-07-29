@@ -1,7 +1,7 @@
 from ..utils import *
 from ..import_torch import *
 
-class MLP(nn.Module):
+class CNN(nn.Module):
     module_name = "mlp"
     module_abbr = "mlp"
     
@@ -11,7 +11,7 @@ class MLP(nn.Module):
         bias = True,
         activations = [nn.Identity()],
     ):
-        super(MLP, self).__init__()
+        super(CNN, self).__init__()
         assert (len(activations)==len(layer_sizes)-1)
         self.layers = nn.Sequential(); self.num_features = layer_sizes[0]; self.num_classes = layer_sizes[-1]
         for i,layer_size in enumerate(layer_sizes[1:], 1):
