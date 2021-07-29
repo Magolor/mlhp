@@ -1,7 +1,8 @@
 from ..utils import *
 from ..import_torch import *
+from ..torch_serializable.torch_serializable import TorchSerializable
 
-class MLP(nn.Module):
+class MLP(nn.Module, TorchSerializable):
     module_name = "mlp"
     module_abbr = "mlp"
     

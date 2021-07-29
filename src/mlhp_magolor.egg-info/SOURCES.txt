@@ -12,7 +12,6 @@ src/mlhp/import_vision.py
 src/mlhp/ml_usage.py
 src/mlhp/regular_usage.py
 src/mlhp/common_models/__init__.py
-src/mlhp/common_models/cnn.py
 src/mlhp/common_models/mlp.py
 src/mlhp/common_models/timm.py
 src/mlhp/logger/__init__.py
