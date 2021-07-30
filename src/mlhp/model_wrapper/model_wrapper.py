@@ -48,6 +48,7 @@ class ModelWrapper(nn.Module, TorchSerializable):
         self.to(device)
         if ddp:
             self.net = DDP(self.net,find_unused_parameters=True)
+
         if immediate_save is not None:
             self.save(path=immediate_save)
 

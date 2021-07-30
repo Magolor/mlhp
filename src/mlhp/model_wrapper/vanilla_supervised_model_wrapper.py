@@ -46,8 +46,11 @@ class VanillaSupervisedModelWrapper(ModelWrapper):
         with torch.enable_grad():
             num_batches = len(loader)
             gradient_step = args['gradient_step'] if 'gradient_step' in args else 1
+            print("**1")
             pbar = TQDM(loader,use_tqdm=args['use_tqdm'])
+            print("**1")
             for batch_id, data in enumerate(pbar):
+                print("**3")
                 # train batch
                 batch_res = self.run_batch(data, return_stats=return_stats, return_outputs=return_outputs)
                 batch_res['loss'].backward()
@@ -117,12 +120,11 @@ def setup_vanilla_supervised_model_wrapper(
     ddp=False,
     device='cpu',
     reset=True,
-    immediate_save=False,
     log_dir="logs/",
     plt_figsize=(8,6),
     plt_dpi=300,
     tracker_dir="stats/",
-
+    **subclass_args,
 ):
     config = LoadJSON(config_path)
 
@@ -142,6 +144,7 @@ def setup_vanilla_supervised_model_wrapper(
         device=device,
         reset=reset,
         immediate_save=immediate_save,
+        **subclass_args,
     )
 
     plotter = Plotter(

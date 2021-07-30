@@ -14,17 +14,17 @@ class Serializable(object):
     def __getstate__(self):
         data = {}
         for key, value in self.__dict__.items():
-            if hasattr(value,'module_name'):
+            if hasattr(value,'__getstate__'):
                 data[key] = value.__getstate__()
             else:
-                data[key] = deepcopy(value)
+                data[key] = value
         data.update({'module_name':self.module_name})
         return data
 
     def __setstate__(self, data):
         assert(data.pop('module_name')==self.module_name)
         for key, value in data.items():
-            if hasattr(value,'module_name'):
+            if hasattr(value,'__setstate__'):
                 self.__dict__[key].__setstate__(value)
             else:
                 self.__dict__[key] = deepcopy(value)

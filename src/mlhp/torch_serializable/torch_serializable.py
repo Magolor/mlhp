@@ -13,7 +13,7 @@ class TorchSerializable(Serializable):
     module_abbr = "pth"
     
     def save_torch(self, path):
-        SaveTorch(self.__getstate__(), path)
+        SaveTorch(self, path)
     
     def load_torch(self, path):
         self.__setstate__(LoadTorch(path))
