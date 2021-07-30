@@ -32,7 +32,7 @@ class VanillaSupervisedModelWrapper(ModelWrapper):
             res['outputs'] = true.detach().cpu()
         return res
 
-    def train_epoch(self, loader, return_stats=False, return_outputs=False, **args):
+    def train_epoch(self, loader, return_stats=False, return_outputs=False, task_output="Train", **args):
         assert (self.optimizer is not None), "Optimizer should not be None for training."
         self.train(); res = {'stats':[], 'outputs':[]}
         
@@ -61,14 +61,14 @@ class VanillaSupervisedModelWrapper(ModelWrapper):
                     res['outputs'].append(batch_res['outputs'])
                 
                 # ouput
-                output = "[%s]"%self.net.module_name+" Epoch %s Train (loss=%7.4f)"%("#%04d"%self.epoch,batch_res['loss'].item())
+                output = "[%s]"%self.net.module_name+" Epoch %s %s (loss=%7.4f)"%("#%04d"%self.epoch,task_output,batch_res['loss'].item())
                 args['logger'].log(output,level=Logger.DEBUG)
                 if args['use_tqdm']:
                     pbar.set_description(output,refresh=True)
         
         return self.batch_reduce(res)
         
-    def valid_epoch(self, loader, return_stats=False, return_outputs=False, **args):
+    def valid_epoch(self, loader, return_stats=False, return_outputs=False, task_output="Valid", **args):
         if (not args['__final__']) and (args['epoch_per_valid']<=0 or self.epoch%args['epoch_per_valid']!=0):
             return None
 
@@ -91,7 +91,7 @@ class VanillaSupervisedModelWrapper(ModelWrapper):
                     res['outputs'].append(batch_res['outputs'])
                 
                 # ouput
-                output = "[%s]"%self.net.module_name+" Epoch %s Valid (loss=%7.4f)"%("#%04d"%self.epoch,batch_res['loss'].item())
+                output = "[%s]"%self.net.module_name+" Epoch %s %s (loss=%7.4f)"%("#%04d"%self.epoch,task_output,batch_res['loss'].item())
                 args['logger'].log(output,level=Logger.DEBUG)
                 if args['use_tqdm']:
                     pbar.set_description(output,refresh=True)

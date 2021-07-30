@@ -120,11 +120,11 @@ class ModelWrapper(nn.Module, TorchSerializable):
 
     # Specify this for each instance if needed
     def testi_epoch(self, loader, return_stats=False, return_outputs=False, **args):
-        return self.valid_epoch(loader, return_stats=return_stats, return_outputs=return_outputs, **args)
+        return self.valid_epoch(loader, return_stats=return_stats, return_outputs=return_outputs, task_output="Test ", **args)
 
     # Specify this for each instance if needed
     def devel_epoch(self, loader, return_stats=False, return_outputs=False, **args):
-        return self.testi_epoch(loader, return_stats=return_stats, return_outputs=return_outputs, **args)
+        return self.testi_epoch(loader, return_stats=return_stats, return_outputs=return_outputs, task_output="Dev  ", **args)
 
     def run_epoch(self, config, final=True):
         # Check that all tasks are well-defined
@@ -175,7 +175,7 @@ class ModelWrapper(nn.Module, TorchSerializable):
             res.append(self.run_epoch(config,final=(i==num_iters-1)))
             for r,t in zip(res[-1],config['tasks']):
                 if t['return_stats'] and (r is not None):
-                    output = "[%s]"%self.net.module_name+" Epoch %s (%s)"%("#%04d"%self.epoch,
+                    output = "[%s]"%self.net.module_name+" Epoch %s %s (%s)"%("#%04d"%self.epoch,t['task'],
                              ', '.join([f"{k}={'%.4f'%v}" for k,v in r['stats'].items()]))
                     t['args']['logger'].log(output,level=Logger.FATAL if (i==num_iters-1) else Logger.INFO)
                     if t['task']=='valid':

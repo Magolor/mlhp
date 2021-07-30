@@ -1,7 +1,7 @@
-from json import load
 from mlhp.ml_usage import *
 from mlhp.import_vision import *
 
+# Define dataset
 def MNISTLoaders(partition=0.8, batch_size=32):
     data_train = TVD.MNIST('data/', train = True, download = True,
         transform = TVT.Compose([TVT.ToTensor(),TVT.Normalize(mean=[0.1307],std=[0.3081])]),
@@ -18,12 +18,15 @@ def MNISTLoaders(partition=0.8, batch_size=32):
         DataLoader(data_test ,batch_size=batch_size,shuffle=False),
     ]
 
+# Define a wrapper easily by inheriting a supervised learning framework
 class MNISTModelWrapper(MR.VanillaSupervisedModelWrapper):
     def batch_stats(self, pred, true):
         return {'acc':torch.eq(pred.argmax(dim=-1), true).float().mean()}
     
 if __name__=="__main__":
-    num_epoch = 10
+    
+    num_epoch = 2
+
     # Model
     net = MD.MLP(
         layer_sizes=[784,512,512,10],
@@ -37,6 +40,7 @@ if __name__=="__main__":
         lr = 0.001,
     )
 
+    # Scheduler
     scheduler = sched.CosineAnnealingLR(
         optimizer,
         T_max = num_epoch,
@@ -69,7 +73,6 @@ if __name__=="__main__":
         ddp             = False,
         device          = "cpu",
         reset           = True,
-        immediate_save  = None,
 
         # Logging Args
         log_dir         = "logs/",
@@ -80,4 +83,10 @@ if __name__=="__main__":
     
     ViewDict(config)
     
+    # Timer
+    T = timer.Timer(keys=["base"])
+    T.start_all()
+
     mr.run(num_epoch, config)
+
+    T.pause_all()
