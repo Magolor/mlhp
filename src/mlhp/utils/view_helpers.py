@@ -76,6 +76,10 @@ def ViewS(obj, length=4096, charcount=False, items=None, itemcount=None, last_co
 def View(obj, length=4096, charcount=False, items=None, itemcount=None, last_comma=None, mode='deduce', indent=None, bracket='[]'):
     print(ViewS(obj, length=length, charcount=charcount, items=items, itemcount=itemcount, last_comma=last_comma, mode=mode, indent=indent, bracket=bracket))
 
+
+def PrintFile(file_handle, *args, **kwargs):
+    print(*args, file=file_handle, flush=True, **kwargs)
+
 def PrintConsole(*args, **kwargs):
     print(*args, file=sys.stdout, flush=True, **kwargs)
 

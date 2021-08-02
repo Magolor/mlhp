@@ -32,6 +32,9 @@ class Tracker(PickleSerializable):
         self.curves = {metric.name:[] for metric in metrics}
         self.plotter = plotter
 
+    def keys(self):
+        return self.metrics.keys()
+
     def metric_data(self, metric):
         return self.curves[metric]
 
