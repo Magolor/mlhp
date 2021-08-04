@@ -19,6 +19,7 @@ class ModelWrapper(nn.Module, TorchSerializable):
         primary = None,
         epoch = 0,
         ddp = False,
+        ddp_gpu = "0,1,2,3,4,5,6,7",
         device = 'cpu',
         reset = False,
         immediate_save = None,
@@ -45,6 +46,13 @@ class ModelWrapper(nn.Module, TorchSerializable):
         self.epoch = epoch
 
         self.ddp = ddp
+        
+        if ddp:
+            os.environ['CUDA_VISIBLE_DEVICES'] = ddp_gpu
+            torch.distributed.init_process_group(backend='nccl')
+            local_rank = torch.distributed.get_rank()
+            torch.cuda.set_device(local_rank)
+            device = torch.device("cuda", local_rank)
         self.to(device)
         if ddp:
             self.net = DDP(self.net,find_unused_parameters=True)
