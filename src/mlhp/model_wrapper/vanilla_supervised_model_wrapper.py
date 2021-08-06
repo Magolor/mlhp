@@ -16,7 +16,7 @@ class VanillaSupervisedModelWrapper(ModelWrapper):
         raise NotImplementedError
 
     # Specify this for each instance
-    def batch_reduce(self, res):
+    def batch_reduce(self, res, mode):
         return {
             'stats': {k:np.array([r[k] for r in res['stats']]).mean().item() for k in res['stats'][0]} if len(res['stats'])>0 else {},
             'outputs': torch.cat(res['outputs'], dim=0) if len(res['outputs'])>0 else None,
@@ -32,7 +32,7 @@ class VanillaSupervisedModelWrapper(ModelWrapper):
             res['outputs'] = true.detach().cpu()
         return res
 
-    def train_epoch(self, loader, return_stats=False, return_outputs=False, task_output="Train", **args):
+    def train_epoch(self, loader, return_stats=False, return_outputs=False, task="train", **args):
         assert (self.optimizer is not None), "Optimizer should not be None for training."
         self.train(); res = {'stats':[], 'outputs':[]}
         
@@ -61,14 +61,14 @@ class VanillaSupervisedModelWrapper(ModelWrapper):
                     res['outputs'].append(batch_res['outputs'])
                 
                 # ouput
-                output = "[%s]"%self.net.module_name+" Epoch %s %s (loss=%7.4f)"%("#%04d"%self.epoch,task_output,batch_res['loss'].item())
+                output = "[%s]"%self.net.module_name+" Epoch %s %s (loss=%7.4f)"%("#%04d"%self.epoch,task,batch_res['loss'].item())
                 args['logger'].log(output,level=Logger.DEBUG)
                 if args['use_tqdm']:
                     pbar.set_description(output,refresh=True)
         
-        return self.batch_reduce(res)
+        return self.batch_reduce(res, mode=task)
         
-    def valid_epoch(self, loader, return_stats=False, return_outputs=False, task_output="Valid", **args):
+    def valid_epoch(self, loader, return_stats=False, return_outputs=False, task="valid", **args):
         if (not args['__final__']) and (args['epoch_per_valid']<=0 or self.epoch%args['epoch_per_valid']!=0):
             return None
 
@@ -91,12 +91,12 @@ class VanillaSupervisedModelWrapper(ModelWrapper):
                     res['outputs'].append(batch_res['outputs'])
                 
                 # ouput
-                output = "[%s]"%self.net.module_name+" Epoch %s %s (loss=%7.4f)"%("#%04d"%self.epoch,task_output,batch_res['loss'].item())
+                output = "[%s]"%self.net.module_name+" Epoch %s %s (loss=%7.4f)"%("#%04d"%self.epoch,task,batch_res['loss'].item())
                 args['logger'].log(output,level=Logger.DEBUG)
                 if args['use_tqdm']:
                     pbar.set_description(output,refresh=True)
         
-        return self.batch_reduce(res)
+        return self.batch_reduce(res, mode=task)
 
 def setup_vanilla_supervised_model_wrapper(
     exp_root,

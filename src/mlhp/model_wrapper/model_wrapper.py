@@ -128,11 +128,11 @@ class ModelWrapper(nn.Module, TorchSerializable):
 
     # Specify this for each instance if needed
     def testi_epoch(self, loader, return_stats=False, return_outputs=False, **args):
-        return self.valid_epoch(loader, return_stats=return_stats, return_outputs=return_outputs, task_output="Test ", **args)
+        return self.valid_epoch(loader, return_stats=return_stats, return_outputs=return_outputs, task="testi", **args)
 
     # Specify this for each instance if needed
     def devel_epoch(self, loader, return_stats=False, return_outputs=False, **args):
-        return self.testi_epoch(loader, return_stats=return_stats, return_outputs=return_outputs, task_output="Dev  ", **args)
+        return self.testi_epoch(loader, return_stats=return_stats, return_outputs=return_outputs, task="devel", **args)
 
     def run_epoch(self, config, final=True):
         # Check that all tasks are well-defined
