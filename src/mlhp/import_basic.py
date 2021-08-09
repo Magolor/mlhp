@@ -17,6 +17,7 @@ import itertools
 import subprocess
 import collections
 
+from PIL import Image
 from copy import deepcopy
 from pathlib import Path as Path
 from collections import Iterable as iterable

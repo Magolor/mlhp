@@ -178,9 +178,8 @@ class ModelWrapper(nn.Module, TorchSerializable):
 
     # Specify this for each instance if needed
     def run(self, num_iters, config):
-        res = []
         for i in range(num_iters):
-            res.append(self.run_epoch(config,final=(i==num_iters-1)))
+            res = self.run_epoch(config,final=(i==num_iters-1))
             for r,t in zip(res[-1],config['tasks']):
                 if t['return_stats'] and (r is not None):
                     output = "[%s]"%self.net.module_name+" Epoch %s %s (%s)"%("#%04d"%self.epoch,t['task'],
@@ -194,4 +193,4 @@ class ModelWrapper(nn.Module, TorchSerializable):
             self.tracker.plot()
             self.tracker.save(self.tracker.path)
             self.tracker.save_json(Prefix(self.tracker.path)+".json")
-        return res
+            yield res
