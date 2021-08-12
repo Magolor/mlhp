@@ -73,7 +73,7 @@ class ModelWrapper(nn.Module, TorchSerializable):
 
     def train(self):
         if self.net is not None:
-            self.net.eval()
+            self.net.train()
         return self
 
     def save(self, path=None):
