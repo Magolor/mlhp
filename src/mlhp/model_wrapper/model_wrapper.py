@@ -180,7 +180,7 @@ class ModelWrapper(nn.Module, TorchSerializable):
     def run(self, num_iters, config):
         for i in range(num_iters):
             res = self.run_epoch(config,final=(i==num_iters-1))
-            for r,t in zip(res[-1],config['tasks']):
+            for r,t in zip(res,config['tasks']):
                 if t['return_stats'] and (r is not None):
                     output = "[%s]"%self.net.module_name+" Epoch %s %s (%s)"%("#%04d"%self.epoch,t['task'],
                              ', '.join([f"{k}={'%.4f'%v}" for k,v in r['stats'].items()]))
